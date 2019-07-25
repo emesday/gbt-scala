@@ -12,6 +12,7 @@ class GBTSuite extends FunSuite with Matchers {
   }
 
   test("gbt - regression") {
+    println("test gbt - regression")
     val featureSize = 28
     val train = "tests/regression.train"
     val test = "tests/regression.test"
@@ -26,7 +27,7 @@ class GBTSuite extends FunSuite with Matchers {
     val gbt = new GBT(
       numBoostRounds = 20,
       maxDepth = 5,
-      lambda = 1,
+      lambda = 1f,
       featureSize = featureSize,
       minSplitGain = 0.1f,
       learningRate = 0.3f,
@@ -44,11 +45,12 @@ class GBTSuite extends FunSuite with Matchers {
   }
 
   test("gbt - classification") {
-    val featureSize = 4
-    val train = "tests/data_banknote_authentication.txt.train"
-    val test = "tests/data_banknote_authentication.txt.test"
+    println("test gbt - classification")
+    val featureSize = 28
+    val train = "tests/binary.train"
+    val test = "tests/binary.test"
     val parser = { line: String =>
-      val xs = line.split(",")
+      val xs = line.split("\\s+")
       LabeledPoint(xs(0).toFloat, Vectors.dense(xs.drop(1).map(_.toFloat)))
     }
 
@@ -56,13 +58,13 @@ class GBTSuite extends FunSuite with Matchers {
     val testDataset = read(test, parser)
 
     val gbt = new GBT(
-      numBoostRounds = 20,
+      numBoostRounds = 100,
       maxDepth = 5,
-      lambda = 1,
+      lambda = 1f,
       featureSize = featureSize,
       minSplitGain = 0.1f,
       learningRate = 0.3f,
-      earlyStoppingRounds = 5,
+      earlyStoppingRounds = 10,
       func = Classification,
       seed = 1235L)
 
@@ -74,7 +76,7 @@ class GBTSuite extends FunSuite with Matchers {
     val auc = metrics.areaUnderROC()
 
     println(s"AUC of test dataset: $auc")
-    auc shouldBe 0.9981f +- 1e-4f
+    auc shouldBe 0.7631f +- 1e-4f
   }
 
 }
