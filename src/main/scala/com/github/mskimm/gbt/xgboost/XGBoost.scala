@@ -24,7 +24,6 @@ case class XGBoostNode(feature: Int, value: Float, yes: Int, no: Int, missing: I
 object XGBoostModel {
 
   private val defaultCondition: String = "<"
-  private val comparator: (Int, Int) => Int = Integer.compare
   private val boosterRegex: Regex = "^booster\\[([0-9]+)\\]:$".r
   private val treeNodeRegex: Regex = "^\t*([0-9]+):\\[f([0-9]+)([<>])(.*)\\] yes=([0-9]+),no=([0-9]+),missing=([0-9]+)$".r
   private val leafNodeRegex: Regex = "^\t*([0-9]+):leaf=(.*)$".r
