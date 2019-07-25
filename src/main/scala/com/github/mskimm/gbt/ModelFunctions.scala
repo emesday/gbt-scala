@@ -10,26 +10,39 @@ trait TreeModel {
 
 }
 
-trait TreeNode
+trait TreeNode {
 
-sealed case class Node(feature: Int, value: Float, left: Int, right: Int) extends TreeNode
+  def traverse(vector: Vector, nodes: Seq[TreeNode]): TreeNode
 
-sealed case class Leaf(value: Float) extends TreeNode
+}
 
-class Tree(nodes: Seq[TreeNode]) extends Serializable {
+case class Node(feature: Int, value: Float, left: Int, right: Int) extends TreeNode {
 
-  val root: TreeNode = nodes.last
+  override def traverse(vector: Vector, nodes: Seq[TreeNode]): TreeNode = {
+    val found = vector(feature)
+    if (found <= value) {
+      nodes(left)
+    } else {
+      nodes(right)
+    }
+  }
+
+}
+
+case class Leaf(value: Float) extends TreeNode {
+
+  override def traverse(vector: Vector, node: Seq[TreeNode]): TreeNode = this
+
+}
+
+class Tree(nodes: Seq[TreeNode], rootIndex: Int = -1) extends Serializable {
+
+  val root: TreeNode = if (rootIndex >= 0) nodes(rootIndex) else nodes.last
 
   def predict(vector: Vector): Float = {
     var node = root
     while (!node.isInstanceOf[Leaf]) {
-      val n = node.asInstanceOf[Node]
-      val found = vector(n.feature)
-      if (found <= n.value) {
-        node = nodes(n.left)
-      } else {
-        node = nodes(n.right)
-      }
+      node = node.traverse(vector, nodes)
     }
     node.asInstanceOf[Leaf].value
   }

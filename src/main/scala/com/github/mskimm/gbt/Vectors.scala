@@ -4,6 +4,16 @@ trait Vector {
 
   def apply(i: Int): Float
 
+  def get(i: Int): Option[Float]
+
+}
+
+object EmptyVector extends Vector {
+
+  override def get(i: Int): Option[Float] = None
+
+  override def apply(i: Int): Float = throw new IllegalArgumentException
+
 }
 
 class DenseVector(values: Array[Float])
@@ -11,6 +21,7 @@ class DenseVector(values: Array[Float])
 
   override def apply(i: Int): Float = values(i)
 
+  override def get(i: Int): Option[Float] = Some(apply(i))
 }
 
 class SparseVector(indices: Array[Int], values: Array[Float] = null)
@@ -21,6 +32,13 @@ class SparseVector(indices: Array[Int], values: Array[Float] = null)
       case found if found < 0 => 0f
       case found if values != null => values(found)
       case _ => 1f
+    }
+  }
+
+  override def get(i: Int): Option[Float] = {
+    apply(i) match {
+      case 0 => None
+      case value => Some(value)
     }
   }
 
@@ -39,6 +57,8 @@ object Vectors {
   def dense(values: Array[Float]): Vector = {
     new DenseVector(values)
   }
+
+  def empty: Vector = EmptyVector
 
 }
 

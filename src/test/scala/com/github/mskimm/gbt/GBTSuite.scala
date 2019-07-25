@@ -2,27 +2,34 @@ package com.github.mskimm.gbt
 
 import org.scalatest.{FunSuite, Matchers}
 
-class GBTSuite extends FunSuite with Matchers {
+object GBTSuite {
 
-  def read(train: String, parser: String => LabeledPoint): Array[LabeledPoint] = {
-    val source = io.Source.fromFile(train)
+  def read(path: String, parser: String => LabeledPoint): Array[LabeledPoint] = {
+    val source = io.Source.fromFile(path)
     val result = source.getLines().map(parser).toArray
     source.close()
     result
   }
+
+  val tsvParser: String => LabeledPoint = { line: String =>
+    val xs = line.split("\\s+")
+    LabeledPoint(xs(0).toFloat, Vectors.dense(xs.drop(1).map(_.toFloat)))
+  }
+
+}
+
+class GBTSuite extends FunSuite with Matchers {
+
+  import GBTSuite._
 
   test("gbt - regression") {
     println("test gbt - regression")
     val featureSize = 28
     val train = "tests/regression.train"
     val test = "tests/regression.test"
-    val parser = { line: String =>
-      val xs = line.split("\\s+")
-      LabeledPoint(xs(0).toFloat, Vectors.dense(xs.drop(1).map(_.toFloat)))
-    }
 
-    val trainDataset = read(train, parser)
-    val testDataset = read(test, parser)
+    val trainDataset = read(train, tsvParser)
+    val testDataset = read(test, tsvParser)
 
     val gbt = new GBT(
       numBoostRounds = 20,
@@ -49,13 +56,9 @@ class GBTSuite extends FunSuite with Matchers {
     val featureSize = 28
     val train = "tests/binary.train"
     val test = "tests/binary.test"
-    val parser = { line: String =>
-      val xs = line.split("\\s+")
-      LabeledPoint(xs(0).toFloat, Vectors.dense(xs.drop(1).map(_.toFloat)))
-    }
 
-    val trainDataset = read(train, parser)
-    val testDataset = read(test, parser)
+    val trainDataset = read(train, tsvParser)
+    val testDataset = read(test, tsvParser)
 
     val gbt = new GBT(
       numBoostRounds = 100,
