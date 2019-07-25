@@ -76,10 +76,14 @@ Note: for classification, assign `func` to `Classification` instead of `Regressi
 
 # Features
 
- - Exact greedy algorithm
- - [TBD] Approximate greedy algorithm using quantile sketch and gradient histogram
- - Regression with L2 loss
- - Classification with log loss
+ - Trainer
+     - Exact greedy algorithm
+     - [TBD] Approximate greedy algorithm using quantile sketch and gradient histogram
+     - Regression with L2 loss
+     - Classification with log loss
+ - Predictor
+     - XGBoost Model
+         - dump by `dump_model` (see [`tests/xgboost_example.py`](https://github.com/mskimm/gbt-scala/blob/master/tests/xgboost_example.py) and [`XGBoostSuite`](https://github.com/mskimm/gbt-scala/blob/master/src/test/scala/com/github/mskimm/gbt/xgboost/XGBoostSuite.scala))
  
 # References
  - T. Chen and C. Guestrin. XGBoost: A Scalable Tree Boosting System. 2016.
