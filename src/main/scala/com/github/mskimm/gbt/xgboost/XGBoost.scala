@@ -3,8 +3,7 @@ package com.github.mskimm.gbt.xgboost
 import java.io.InputStream
 import java.nio.file.{Files, Paths}
 
-import com.github.mskimm.gbt
-import com.github.mskimm.gbt.{ClassificationTreeModel, Leaf, ModelFunctions, Tree, TreeModel, TreeNode}
+import com.github.mskimm.gbt._
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -12,7 +11,7 @@ import scala.util.matching.Regex
 
 case class XGBoostNode(feature: Int, value: Float, yes: Int, no: Int, missing: Int) extends TreeNode {
 
-  override def traverse(vector: gbt.Vector, nodes: Seq[TreeNode]): TreeNode = {
+  override def traverse(vector: Vector, nodes: Seq[TreeNode]): TreeNode = {
     vector.get(feature) match {
       case None => nodes(missing)
       case Some(v) if v < value => nodes(yes)
