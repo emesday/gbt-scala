@@ -1,9 +1,10 @@
 package com.github.mskimm.gbt.xgboost
 
 import java.io.InputStream
+import java.nio.file.{Files, Paths}
 
 import com.github.mskimm.gbt
-import com.github.mskimm.gbt.{ClassificationTreeModel, Leaf, Tree, TreeModel, TreeNode}
+import com.github.mskimm.gbt.{ClassificationTreeModel, Leaf, ModelFunctions, Tree, TreeModel, TreeNode}
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -29,7 +30,7 @@ object XGBoostModel {
   private val treeNodeRegex: Regex = "^\t*([0-9]+):\\[f([0-9]+)([<>])(.*)\\] yes=([0-9]+),no=([0-9]+),missing=([0-9]+)$".r
   private val leafNodeRegex: Regex = "^\t*([0-9]+):leaf=(.*)$".r
 
-  def load(lines: Iterator[String]): TreeModel = {
+  def load(lines: Iterator[String], func: ModelFunctions): TreeModel = {
     var boosterId = -1
     var booster = new mutable.HashMap[Int, TreeNode]()
     val boosters = new ArrayBuffer[Tree]()
@@ -61,12 +62,20 @@ object XGBoostModel {
       }
     }
     addBooster()
-    new ClassificationTreeModel(boosters)
+    func.createModel(boosters)
   }
 
-  def load(is: InputStream): TreeModel = {
+  def load(is: InputStream, func: ModelFunctions): TreeModel = {
     val lines = scala.io.Source.fromInputStream(is).getLines()
-    load(lines)
+    load(lines, func)
   }
+
+  def load(path: String, func: ModelFunctions): TreeModel = {
+    val is = Files.newInputStream(Paths.get(path))
+    val model = load(is, func)
+    is.close()
+    model
+  }
+
 }
 

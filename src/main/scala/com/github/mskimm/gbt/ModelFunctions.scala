@@ -93,7 +93,7 @@ trait ModelFunctions {
 
 }
 
-private[gbt] object Regression extends ModelFunctions {
+object Regression extends ModelFunctions {
 
   override def createModel(trees: Seq[Tree]): TreeModel = {
     new RegressionTreeModel(trees)
@@ -114,7 +114,7 @@ private[gbt] object Regression extends ModelFunctions {
 
 }
 
-private[gbt] object Classification extends ModelFunctions {
+object Classification extends ModelFunctions {
 
   override def createModel(trees: Seq[Tree]): TreeModel = {
     new ClassificationTreeModel(trees)
