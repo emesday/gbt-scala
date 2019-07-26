@@ -2,7 +2,7 @@ package com.github.mskimm.gbt.xgboost
 
 import com.github.mskimm.gbt.{GBTModel, Vectors}
 import com.github.mskimm.testing.SparkSessionProvider
-import ml.dmlc.xgboost4j.scala.spark.XGBoostClassifier
+import ml.dmlc.xgboost4j.scala.spark.{XGBoostClassificationModel, XGBoostClassifier}
 import org.apache.spark.ml.evaluation.BinaryClassificationEvaluator
 import org.apache.spark.ml.linalg.{DenseVector => MlDenseVector, SparseVector => MlSparseVector, Vector => MlVector, Vectors => MlVectors}
 import org.apache.spark.sql.functions._
@@ -25,45 +25,37 @@ class XGBoostSparkSuite extends FunSuite with Matchers with SparkSessionProvider
 
   test("xgboost4j-spark") {
     import spark.implicits._
-    val tr = toDataset(spark.read.text("tests/binary.train").as[String])
-    val va = toDataset(spark.read.text("tests/binary.test").as[String])
+        val tr = toDataset(spark.read.text("tests/binary.train").as[String])
+        val va = toDataset(spark.read.text("tests/binary.test").as[String])
 
-    val model = new XGBoostClassifier()
+    val xgbModel: XGBoostClassificationModel = new XGBoostClassifier()
       .setNumWorkers(1)
       .setNumRound(10)
       .setMaxDepth(5)
       .setEta(0.1)
       .fit(tr)
 
-    val dump = model.nativeBooster.getModelDump()
-    val dumpIterator = dump.iterator.zipWithIndex.flatMap { case (booster, index) =>
-      Iterator(s"booster[$index]:") ++ booster.split("\n")
-    }
+    val xgbPredictions = xgbModel.transform(va)
 
-    val model2 = XGBoostModel.load(dumpIterator, GBTModel.Classification)
-    val bcastModel = spark.sparkContext.broadcast(model2)
+    val gbtModel: GBTModel = XGBoostModel.loadBoosters(xgbModel.nativeBooster.getModelDump(), GBTModel.Classification)
+    val gbtModelBr = spark.sparkContext.broadcast(gbtModel)
     val rawPredictUDF = udf { features: Any =>
       val vector = features.asInstanceOf[MlVector] match {
         case d: MlDenseVector => Vectors.dense(d.values.map(_.toFloat))
         case s: MlSparseVector => Vectors.sparse(s.indices, s.values.map(_.toFloat))
       }
-      val prediction = bcastModel.value.predict(vector).toDouble
+      val prediction = gbtModelBr.value.predict(vector).toDouble
       MlVectors.dense(Array(-prediction, prediction))
     }
 
-    val withPredictions = va
-      .withColumn("rawPrediction", rawPredictUDF(col("features")))
+    val gbtPredictions = va.withColumn("rawPrediction", rawPredictUDF(col("features")))
 
-    val auc = new BinaryClassificationEvaluator()
-      .evaluate(model.transform(va))
+    val xgbAuc = new BinaryClassificationEvaluator().evaluate(xgbPredictions)
+    val gbtAuc = new BinaryClassificationEvaluator().evaluate(gbtPredictions)
 
-    val auc2 = new BinaryClassificationEvaluator()
-      .evaluate(withPredictions)
+    println(f"AUC of test dataset: $xgbAuc%.4f (xgboost), $gbtAuc%.4f (gbt)")
 
-    println(s"AUC of test dataset: $auc")
-    println(s"AUC of test dataset: $auc2")
-
-    auc2 shouldBe auc
+    gbtAuc shouldBe xgbAuc +- 1e-4
   }
 
 }

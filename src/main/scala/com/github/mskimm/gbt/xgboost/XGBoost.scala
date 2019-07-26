@@ -3,6 +3,7 @@ package com.github.mskimm.gbt.xgboost
 import java.io.InputStream
 import java.nio.file.{Files, Paths}
 
+import com.github.mskimm.gbt.GBTModel.ModelType
 import com.github.mskimm.gbt._
 
 import scala.collection.mutable
@@ -28,7 +29,7 @@ object XGBoostModel {
   private val treeNodeRegex: Regex = "^\t*([0-9]+):\\[f([0-9]+)([<>])(.*)\\] yes=([0-9]+),no=([0-9]+),missing=([0-9]+)$".r
   private val leafNodeRegex: Regex = "^\t*([0-9]+):leaf=(.*)$".r
 
-  def load(lines: Iterator[String], modelType: GBTModel.ModelType): GBTModel = {
+  def load(lines: Iterator[String], modelType: ModelType): GBTModel = {
     var boosterId = -1
     var booster = new mutable.HashMap[Int, TreeNode]()
     val boosters = new ArrayBuffer[Tree]()
@@ -64,16 +65,23 @@ object XGBoostModel {
     GBTModel.create(boosters, modelType)
   }
 
-  def load(is: InputStream, modelType: GBTModel.ModelType): GBTModel = {
+  def load(is: InputStream, modelType: ModelType): GBTModel = {
     val lines = scala.io.Source.fromInputStream(is).getLines()
     load(lines, modelType)
   }
 
-  def load(path: String, modelType: GBTModel.ModelType): GBTModel = {
+  def load(path: String, modelType: ModelType): GBTModel = {
     val is = Files.newInputStream(Paths.get(path))
     val model = load(is, modelType)
     is.close()
     model
+  }
+
+  def loadBoosters(boosters: Seq[String], modelType: ModelType): GBTModel = {
+    val flatten = boosters.iterator.zipWithIndex.flatMap { case (booster, index) =>
+      Iterator(s"booster[$index]:") ++ booster.split("\n")
+    }
+    load(flatten, modelType)
   }
 
 }
