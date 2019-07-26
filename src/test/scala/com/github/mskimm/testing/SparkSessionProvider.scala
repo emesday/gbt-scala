@@ -4,7 +4,7 @@ import org.scalatest.{Suite, SuiteMixin}
 
 trait SparkSessionProvider extends SuiteMixin { this: Suite =>
 
-  lazy val spark: SparkSession = SparkSession
+  lazy implicit val spark: SparkSession = SparkSession
     .builder
     .master("local[*]")
     .appName("spark-session-provider")

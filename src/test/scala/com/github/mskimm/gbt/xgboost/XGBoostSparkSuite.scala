@@ -1,32 +1,18 @@
 package com.github.mskimm.gbt.xgboost
 
 import com.github.mskimm.gbt.{GBTModel, Vectors}
-import com.github.mskimm.testing.SparkSessionProvider
+import com.github.mskimm.testing.{Datasets, SparkSessionProvider}
 import ml.dmlc.xgboost4j.scala.spark.{XGBoostClassificationModel, XGBoostClassifier}
 import org.apache.spark.ml.evaluation.BinaryClassificationEvaluator
 import org.apache.spark.ml.linalg.{DenseVector => MlDenseVector, SparseVector => MlSparseVector, Vector => MlVector, Vectors => MlVectors}
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.{DataFrame, Dataset}
 import org.scalatest.{FunSuite, Matchers}
 
 class XGBoostSparkSuite extends FunSuite with Matchers with SparkSessionProvider {
 
-  def toDataset(ds: Dataset[String]): DataFrame = {
-    import ds.sparkSession.implicits._
-    ds
-      .map { line =>
-        val xs = line.split("\t")
-        val label = xs(0).toDouble
-        val features = xs.drop(1).map(_.toDouble)
-        (label, MlVectors.dense(features))
-      }
-      .toDF("label", "features")
-  }
 
   test("xgboost4j-spark") {
-    import spark.implicits._
-        val tr = toDataset(spark.read.text("tests/binary.train").as[String])
-        val va = toDataset(spark.read.text("tests/binary.test").as[String])
+    val (tr, va) = Datasets.binary
 
     val xgbModel: XGBoostClassificationModel = new XGBoostClassifier()
       .setNumWorkers(1)
