@@ -2,7 +2,7 @@ package com.github.mskimm.gbt
 
 import scala.util.Random
 
-trait TreeModel {
+trait TreeModel extends Serializable {
 
   val trees: Seq[Tree]
 
@@ -10,7 +10,7 @@ trait TreeModel {
 
 }
 
-trait TreeNode {
+trait TreeNode extends Serializable {
 
   def traverse(vector: Vector, nodes: Seq[TreeNode]): TreeNode
 

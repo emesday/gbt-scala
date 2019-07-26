@@ -2,6 +2,8 @@ package com.github.mskimm.gbt
 
 import org.scalatest.{FunSuite, Matchers}
 
+import scala.io
+
 object GBTSuite {
 
   def read(path: String, parser: String => LabeledPoint): Array[LabeledPoint] = {
