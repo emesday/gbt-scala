@@ -1,5 +1,7 @@
-package com.github.mskimm.gbt
+package com.github.mskimm.gbt.experimental
 
+import com.github.mskimm.gbt.evaluation.{BinaryClassificationMetrics, Metrics}
+import com.github.mskimm.gbt.{LabeledPoint, Vectors}
 import org.scalatest.{FunSuite, Matchers}
 
 import scala.io

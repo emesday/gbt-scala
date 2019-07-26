@@ -3,16 +3,17 @@ package com.github.mskimm.gbt.xgboost
 import java.nio.file.{Files, Paths}
 
 import com.github.mskimm.gbt._
+import com.github.mskimm.gbt.evaluation.BinaryClassificationMetrics
 import org.scalatest.{FunSuite, Inspectors, Matchers}
 
 class XGBoostSuite extends FunSuite with Matchers with Inspectors {
 
-  import com.github.mskimm.gbt.GBTSuite._
+  import com.github.mskimm.gbt.experimental.GBTSuite._
 
   val xgboostModelPath = "tests/xgboost.binary.model.dump"
   val xgboostPredPath = "tests/xgboost.binary.pred.txt"
 
-  val model = XGBoostModel.load("tests/xgboost.binary.model.dump", Classification)
+  val model = XGBoostModel.load("tests/xgboost.binary.model.dump", GBTModel.Classification)
 
   val test: String = "tests/binary.test"
   val testDataset: Array[LabeledPoint] = read(test, tsvParser)

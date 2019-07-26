@@ -1,4 +1,4 @@
-package com.github.mskimm.gbt
+package com.github.mskimm.gbt.experimental
 
 class StopWatch {
 

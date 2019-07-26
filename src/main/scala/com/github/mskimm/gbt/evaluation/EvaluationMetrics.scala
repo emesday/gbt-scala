@@ -1,4 +1,4 @@
-package com.github.mskimm.gbt
+package com.github.mskimm.gbt.evaluation
 
 import scala.collection.mutable
 

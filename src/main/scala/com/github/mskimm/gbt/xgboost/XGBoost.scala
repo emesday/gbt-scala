@@ -28,7 +28,7 @@ object XGBoostModel {
   private val treeNodeRegex: Regex = "^\t*([0-9]+):\\[f([0-9]+)([<>])(.*)\\] yes=([0-9]+),no=([0-9]+),missing=([0-9]+)$".r
   private val leafNodeRegex: Regex = "^\t*([0-9]+):leaf=(.*)$".r
 
-  def load(lines: Iterator[String], func: ModelFunctions): TreeModel = {
+  def load(lines: Iterator[String], modelType: GBTModel.ModelType): GBTModel = {
     var boosterId = -1
     var booster = new mutable.HashMap[Int, TreeNode]()
     val boosters = new ArrayBuffer[Tree]()
@@ -60,17 +60,18 @@ object XGBoostModel {
       }
     }
     addBooster()
-    func.createModel(boosters)
+
+    GBTModel.create(boosters, modelType)
   }
 
-  def load(is: InputStream, func: ModelFunctions): TreeModel = {
+  def load(is: InputStream, modelType: GBTModel.ModelType): GBTModel = {
     val lines = scala.io.Source.fromInputStream(is).getLines()
-    load(lines, func)
+    load(lines, modelType)
   }
 
-  def load(path: String, func: ModelFunctions): TreeModel = {
+  def load(path: String, modelType: GBTModel.ModelType): GBTModel = {
     val is = Files.newInputStream(Paths.get(path))
-    val model = load(is, func)
+    val model = load(is, modelType)
     is.close()
     model
   }

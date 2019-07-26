@@ -1,6 +1,6 @@
 package com.github.mskimm.gbt.xgboost
 
-import com.github.mskimm.gbt.{Classification, Vectors}
+import com.github.mskimm.gbt.{GBTModel, Vectors}
 import com.github.mskimm.testing.SparkSessionProvider
 import ml.dmlc.xgboost4j.scala.spark.XGBoostClassifier
 import org.apache.spark.ml.evaluation.BinaryClassificationEvaluator
@@ -40,7 +40,7 @@ class XGBoostSparkSuite extends FunSuite with Matchers with SparkSessionProvider
       Iterator(s"booster[$index]:") ++ booster.split("\n")
     }
 
-    val model2 = XGBoostModel.load(dumpIterator, Classification)
+    val model2 = XGBoostModel.load(dumpIterator, GBTModel.Classification)
     val bcastModel = spark.sparkContext.broadcast(model2)
     val rawPredictUDF = udf { features: Any =>
       val vector = features.asInstanceOf[MlVector] match {

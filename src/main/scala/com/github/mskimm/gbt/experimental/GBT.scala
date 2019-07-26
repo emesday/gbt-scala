@@ -1,7 +1,66 @@
-package com.github.mskimm.gbt
+package com.github.mskimm.gbt.experimental
+
+import com.github.mskimm.gbt._
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
+
+trait ModelFunctions {
+
+  def createModel(trees: Seq[Tree]): GBTModel
+
+  def initGrad(implicit random: Random): Float
+
+  def initHess(implicit random: Random): Float
+
+  def computeGrad(y: Float, yh: Float): Float
+
+  def computeHess(y: Float, yh: Float): Float
+
+  def computeLoss(y: Float, yh: Float): Float
+
+}
+
+object Regression extends ModelFunctions {
+
+  override def createModel(trees: Seq[Tree]): GBTModel = {
+    new GBTRegressionModel(trees)
+  }
+
+  override def initGrad(implicit random: Random): Float = random.nextFloat()
+
+  override def initHess(implicit random: Random): Float = 2f
+
+  override def computeGrad(y: Float, yh: Float): Float = 2 * (yh - y)
+
+  override def computeHess(y: Float, yh: Float): Float = 2
+
+  override def computeLoss(y: Float, yh: Float): Float = {
+    val d = y - yh
+    d * d
+  }
+
+}
+
+object Classification extends ModelFunctions {
+
+  override def createModel(trees: Seq[Tree]): GBTModel = {
+    new GBTClassificationModel(trees)
+  }
+
+  override def initGrad(implicit random: Random): Float = random.nextFloat()
+
+  override def initHess(implicit random: Random): Float = random.nextFloat()
+
+  override def computeGrad(y: Float, yh: Float): Float = yh - y
+
+  override def computeHess(y: Float, yh: Float): Float = yh * (1f - yh)
+
+  override def computeLoss(y: Float, yh: Float): Float = {
+    -(y * math.log(yh) + (1 - y) * math.log(1 - yh)).toFloat
+  }
+
+}
 
 case class Accumulator(
   g: Float,
@@ -104,7 +163,7 @@ class GBT(
 
   def train(
     instances: Array[LabeledPoint],
-    evalInstances: Array[LabeledPoint] = Array.empty[LabeledPoint]): TreeModel = {
+    evalInstances: Array[LabeledPoint] = Array.empty[LabeledPoint]): GBTModel = {
     val elapsed = new StopWatch
 
     println(s"Start training ... (tr: ${instances.length}, va: ${evalInstances.length})")
