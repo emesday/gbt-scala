@@ -16,7 +16,7 @@ trait TreeNode extends Serializable {
 
 }
 
-case class Node(feature: Int, value: Float, left: Int, right: Int) extends TreeNode {
+case class InternalNode(feature: Int, value: Float, left: Int, right: Int) extends TreeNode {
 
   override def traverse(vector: Vector, nodes: Seq[TreeNode]): TreeNode = {
     val found = vector(feature)
@@ -29,7 +29,7 @@ case class Node(feature: Int, value: Float, left: Int, right: Int) extends TreeN
 
 }
 
-case class Leaf(value: Float) extends TreeNode {
+case class LeafNode(value: Float) extends TreeNode {
 
   override def traverse(vector: Vector, node: Seq[TreeNode]): TreeNode = this
 
@@ -41,10 +41,10 @@ class Tree(nodes: Seq[TreeNode], rootIndex: Int = -1) extends Serializable {
 
   def predict(vector: Vector): Float = {
     var node = root
-    while (!node.isInstanceOf[Leaf]) {
+    while (!node.isInstanceOf[LeafNode]) {
       node = node.traverse(vector, nodes)
     }
-    node.asInstanceOf[Leaf].value
+    node.asInstanceOf[LeafNode].value
   }
 
 }

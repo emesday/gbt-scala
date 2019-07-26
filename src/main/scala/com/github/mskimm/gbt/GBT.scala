@@ -190,7 +190,7 @@ class GBT(
       depth: Int): TreeNode = {
       if (depth > maxDepth) {
         val value = computeLeafWeight(grad, hess, lambda, instances) * shrinkageRate
-        Leaf(value)
+        LeafNode(value)
       } else {
         val accum = instances.getAccumulator(grad, hess)
         for (feature <- 0 until featureSize) {
@@ -203,13 +203,13 @@ class GBT(
         }
         if (accum.bestGain < minSplitGain) {
           val value = computeLeafWeight(grad, hess, lambda, instances) * shrinkageRate
-          Leaf(value)
+          LeafNode(value)
         } else {
           val left = inner(treeNodes, instances.copy(active = accum.bestLeftInstanceIds), depth + 1)
           val right = inner(treeNodes, instances.copy(active = accum.bestRightInstanceIds), depth + 1)
           treeNodes += left
           treeNodes += right
-          Node(accum.bestFeature, accum.bestVal, treeNodes.length - 2, treeNodes.length - 1)
+          InternalNode(accum.bestFeature, accum.bestVal, treeNodes.length - 2, treeNodes.length - 1)
         }
       }
     }

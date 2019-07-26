@@ -9,7 +9,7 @@ import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.util.matching.Regex
 
-case class XGBoostNode(feature: Int, value: Float, yes: Int, no: Int, missing: Int) extends TreeNode {
+case class XGBoostInternalNode(feature: Int, value: Float, yes: Int, no: Int, missing: Int) extends TreeNode {
 
   override def traverse(vector: Vector, nodes: Seq[TreeNode]): TreeNode = {
     vector.get(feature) match {
@@ -54,9 +54,9 @@ object XGBoostModel {
           booster = new mutable.HashMap[Int, TreeNode]()
         case treeNodeRegex(id, feature, condition, value, yes, no, missing) if condition == defaultCondition =>
           features += feature.toInt
-          booster(id.toInt) = XGBoostNode(feature.toInt, value.toFloat, yes.toInt, no.toInt, missing.toInt)
+          booster(id.toInt) = XGBoostInternalNode(feature.toInt, value.toFloat, yes.toInt, no.toInt, missing.toInt)
         case leafNodeRegex(id, value) =>
-          booster(id.toInt) = Leaf(value.toFloat)
+          booster(id.toInt) = LeafNode(value.toFloat)
       }
     }
     addBooster()
